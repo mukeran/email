@@ -18,7 +18,7 @@ The ```email``` package currently supports the following:
 *  More to come!
 
 ### Installation
-```go get github.com/jordan-wright/email```
+```go get github.com/mukeran/email```
 
 *Note: Version > 1 of this library requires Go v1.5 or above.*
 
@@ -87,3 +87,5 @@ Sections inspired by the handy [gophermail](https://github.com/jpoehls/gophermai
 I'd like to thank all the [contributors and maintainers](https://github.com/jordan-wright/email/graphs/contributors) of this package.
 
 A special thanks goes out to Jed Denlea [jeddenlea](https://github.com/jeddenlea) for his numerous contributions and optimizations.
+
+Edited by [mukeran](https://github.com/mukeran).

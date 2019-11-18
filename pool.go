@@ -23,6 +23,7 @@ type Pool struct {
 	mut          *sync.Mutex
 	lastBuildErr *timestampedErr
 	closing      chan struct{}
+	isSSL        bool
 	tlsConfig    *tls.Config
 }
 
@@ -43,11 +44,12 @@ var (
 	ErrTimeout = errors.New("timed out")
 )
 
-func NewPool(address string, count int, auth smtp.Auth, opt_tlsConfig ...*tls.Config) (pool *Pool, err error) {
+func NewPool(address string, count int, auth smtp.Auth, isSSL bool, opt_tlsConfig ...*tls.Config) (pool *Pool, err error) {
 	pool = &Pool{
 		addr:    address,
 		auth:    auth,
 		max:     count,
+		isSSL:   isSSL,
 		clients: make(chan *client, count),
 		rebuild: make(chan struct{}),
 		closing: make(chan struct{}),
@@ -196,10 +198,24 @@ func addAuth(c *client, auth smtp.Auth) (bool, error) {
 }
 
 func (p *Pool) build() (*client, error) {
-	cl, err := smtp.Dial(p.addr)
-	if err != nil {
-		return nil, err
+	var cl *smtp.Client
+	if p.isSSL {
+		conn, err := tls.Dial("tcp", p.addr, p.tlsConfig)
+		if err != nil {
+			return nil, err
+		}
+		cl, err = smtp.NewClient(conn, p.tlsConfig.ServerName)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		var err error
+		cl, err = smtp.Dial(p.addr)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	c := &client{cl, 0}
 
 	if _, err := startTLS(c, p.tlsConfig); err != nil {

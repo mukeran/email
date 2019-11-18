@@ -1,1 +1,3 @@
-module github.com/jordan-wright/email
+module github.com/mukeran/email
+
+go 1.13
